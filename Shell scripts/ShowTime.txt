@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Viser dato og klokkeslæt
+echo "Dato og klokkeslæt:"
+# Her smider den ud som Year, måned, dag, Time, Minutter, sekunder.
+date "+%Y-%m-%d %H:%M:%S"

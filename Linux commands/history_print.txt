@@ -1,0 +1,163 @@
+    1  whoami
+    2  cd ~
+    3  whoamu
+    4  sudo setoolkit
+    5  ls
+    6  cd ~
+    7  cd /home
+    8  pwd
+    9  clear
+   10  cd ~
+   11  cd /home/weiz
+   12  pwd
+   13  whoami
+   14  history
+   15  cd /etc
+   16  ls
+   17  ls -l
+   18  sudo install snort
+   19  install --help
+   20  sudo apt install snort
+   21  cd /etc/apt/
+   22  ls - l
+   23  ls -l
+   24  sudo nano /etc/apt/sources.list
+   25  sudo apt-get update
+   26  sudo apt-get install snort
+   27  sudo apt install wireshark
+   28  clear
+   29  History
+   30  clear
+   31  cd /etc/apt/
+   32  cd ~
+   33  history
+   34  snort
+   35  sudo apt install python3-pip
+   36  sudo pip3 install shodan
+   37  sudo apt install shodan
+   38  nmap
+   39  nmap scrim.live.ts
+   40  nmap ts.scrim.live
+   41  clear
+   42  sudo nmap ts.scrim.live -sV -O -p1-65535
+   43  dirb
+   44  sudo apt install dirb'\n\nsudo apt install dirb\nssh -i C:\Users\WeiZ1\Downloads\LinuxKali_key.pem weiz@172.201.147.61ssh -i C:\Users\WeiZ1\Downloads\LinuxKali_key.pem weiz@172.201.147.61ssh -i C:\Users\WeiZ1\Downloads\LinuxKali_key.pem weiz@172.201.147.61\nssh -i C:\Users\WeiZ1\Downloads\LinuxKali_key.pem weiz@172.201.147.61\n\n'
+   45  sudo apt install dirb
+   46  dirb
+   47  dirb ts.scrim.live
+   48  dirb https://ts.scrim.live
+   49  dirb https://ts.scrim.live/cgi-bin
+   50  loads\LinuxKali_key.pem weiz@172.201.147.6
+   51  dirb https://ts.scrim.live/
+   52  dirb http://ts.scrim.live/
+   53  dirb https://ts.scrim.live/
+   54  sudo nano /usr/share/dirb/wordlists/common.txt
+   55  dirb https://ts.scrim.live/
+   56  dirb https://ts.scrim.live/cgi-bin/
+   57  sudo msfconsole
+   58  sudo apt install metasploit-framework
+   59  sudo msfconsole
+   60  clear
+   61  sudo msfconsole
+   62  dirb http://ts.scrim.live/
+   63  dirb https://ts.scrim.live/
+   64  dirb https://ts.scrim.live/cgi-bin/
+   65  sudo nano /usr/share/wordlists/dirb/common.txt
+   66  sudo nano /usr/share/wordlists
+   67  sudo nano /usr/share/wordlists.txt
+   68  dirb https://ts.scrim.live
+   69  sudo nano /usr/share/dirb/wordlists/common.txt
+   70  dirb https://ts.scrim.live/cgi-bin/
+   71  sudo nmap ts.scrim.live -sV -O -p1-65535
+   72  dirb http://example.com/
+   73  clear
+   74  dirb http://192.168.1.224/
+   75  sudo nmap ts.scrim.live -sV -O -p1-65535
+   76  msfconsole
+   77  nmap ts.scrim.live
+   78  nmap 195.201.85.35
+   79  nmap 195.201.85.35 -sV -O -P1-65535
+   80  nmap 195.201.85.35 -sV -O -p1-65535
+   81  sudo nmap 195.201.85.35 -p6200
+   82  sudo nmap -sS 195.201.85.35 -p6200
+   83  netcat 195.201.85.35 6200
+   84  id
+   85  ip a
+   86  msfconsole
+   87  pwd
+   88  mkdir test
+   89  ls
+   90  cd /test
+   91  cd /home/weiz/test
+   92  pwd
+   93  touch file
+   94  ls
+   95  echo 'ko'
+   96  echo 'ko' file
+   97  sudo nano /home/weiz/test/file.tx
+   98  ls
+   99  sudo birp ts.srcim.live
+  100  birp ts.scrim.live
+  101  history
+  102  dirb ts.scrim.live
+  103  dirb http://ts.scrim.live/
+  104  dirb https://ts.scrim.live/
+  105  nmap ts.scrim.live -sV -O -p1-1000
+  106  msfconsole
+  107  nmap ts.scrim.live -sV -p80 targetid
+  108  nmap ts.scrim.live -sV -p80 target id
+  109  nmap ts.scrim.live -sV -p80 target-id
+  110  nmap -sV -p 80 https://ts.scrim.live/
+  111  nmap -sV ts.scrim.live -p 80
+  112  nmap -sV ts.scrim.live -p1-3000
+  113  msfconsole 
+  114  nmap -sV -p 80,443 ts.scrim.live
+  115  nmap --script ssl-enum-ciphers -p 443 ts.scrim.live
+  116  curl -I https://ts.scrim.live
+  117  whatweb https://ts.scrim.live
+  118  curl -I https://ts.scrim.live
+  119  gobuster
+  120  gobuster dir -u https://ts.scrim.live -w /usr/share/wordlists/dirb/common.txt -k
+  121  cd /usr/share/wordlists
+  122  cd /usr
+  123  -ls
+  124  sudo -ls
+  125  cd ~
+  126  gobuster dir -u https://ts.scrim.live -w /usr/share/wordlists/dirb/common.txt -k
+  127  cd /usr/share/wordlists
+  128  cd /usr/share/
+  129  ls /usr/share/wordlists/dirb/
+  130  sudo ls /usr/share/wordlists/dirb/
+  131  sudo ls /usr/share/
+  132  sudo ls /usr/share/dirb
+  133  sudo ls /usr/share/dirb/wordlists
+  134  cd ~
+  135  gobuster dir -u https://ts.scrim.live -w /usr/share/wordlists/dirb/common.txt -k
+  136  gobuster dir -u https://ts.scrim.live -w /usr/share/dirb/wordlists/common.txt -k
+  137  gobuster dir -u https://ts.scrim.live -w /usr/share/dirb/wordlists/common.txt -k --status-codes-blacklist 502
+  138  nmap -p- -sV -T4 ts.scrim.live
+  139  gobuster dir -u https://ts.scrim.live -w /usr/share/seclists/Discovery/Web-Content/common.txt -k --status-codes-blacklist 502
+  140  sudo ls /usr/share/
+  141  sudo apt install seclists
+  142  sudo ls /usr/share/
+  143  sudo ls /usr/share/seclists
+  144  gobuster dir -u https://ts.scrim.live -w /usr/share/seclists/Discovery/Web-Content/common.txt -k --status-codes-blacklist 502
+  145  curl -k -I https://ts.scrim.live/admin
+  146  curl -k -I https://ts.scrim.live/login
+  147  curl -k -I https://ts.scrim.live/api
+  148  curl -k -I https://ts.scrim.live/upload
+  149  gobuster dir -u https://ts.scrim.live -w /usr/share/seclists/Discovery/Web-Content/big.txt -k --status-codes-blacklist 502
+  150  telnet ts.scrim.live 10011
+  151  telnet ts.scrim.live 80
+  152  curl -k -I https://admin.ts.scrim.live
+  153  curl -k -I https://ts.scrim.live 
+  154  nmap -sV ts.scrim.live -p1-65553
+  155  nmap -sV ts.scrim.live -p1-65535
+  156  nmap -sS ts.scrim.live -p1-65535
+  157  msfconsole
+  158  sudo nano /home/weiz/test/file.tx
+  159  sudo nano /home/weiz/test/file'\nquit\nback\nc\n\n\n\n'' \n'
+  160  sudo nano /home/weiz/test/file
+  161  whoami
+  162  history
+  163  pwd
