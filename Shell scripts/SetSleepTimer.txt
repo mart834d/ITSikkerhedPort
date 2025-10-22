@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Inaktivitetstid i sekunder (5 minutter)
+INAKTIVITET=$((5*60))
+
+echo "Skærmlås vil aktiveres efter $((INAKTIVITET/60)) minutters inaktivitet."
+
+while true; do
+    # Tjek hvor mange sekunder systemet har været inaktivt
+    IDLE=$(xprintidle)  # kræver xprintidle installeret
+    if [ "$IDLE" -ge "$INAKTIVITET" ]; then
+        echo "Låser skærmen..."
+        gnome-screensaver-command -l  # låser skærmen
+        sleep 10  # vent lidt før næste tjek
+    fi
+    sleep 5
+done

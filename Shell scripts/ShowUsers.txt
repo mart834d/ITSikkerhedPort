@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Tæl antal unikke brugere, der er logget ind
+# Den sortere for unikke, så den en burger kun tælles 1 gang.
+# Går ind og læser hvor mange linjer der er tilbage
+ANTAL=$(who | awk '{print $1}' | sort | uniq | wc -l)
+
+echo "====================================="
+echo "  Antal brugere logget ind"
+echo "====================================="
+echo "Der er $ANTAL bruger(e) logget ind."

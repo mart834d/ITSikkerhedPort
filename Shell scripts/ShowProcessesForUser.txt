@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Spørger efter brugernavn
+read -p "Indtast brugernavn: " BRUGER
+
+# Tjekker om brugeren findes i systemet
+if id "$BRUGER" &>/dev/null; then
+    echo "====================================="
+    echo "  Kørende processer for bruger: $BRUGER"
+    echo "====================================="
+    ps -u "$BRUGER" -o pid,tty,time,cmd
+else
+    echo "❌ Bruger '$BRUGER' findes ikke på systemet."
+fi

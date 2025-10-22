@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Viser hostname og IP-adresse
+echo "====================================="
+echo "  Systeminformation"
+echo "====================================="
+# Den her linje viser hostname
+echo "Hostname: $(hostname)"
+# hostname -I finder alle ip addresser, dermed, tager udgangspunkt I den første, som er den primære netværksforbindelse
+echo "IP-adresse: $(hostname -I | awk '{print $1}')"

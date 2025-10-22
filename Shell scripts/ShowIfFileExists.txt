@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Spørger brugeren om filnavn
+read -p "Indtast filsti: " FIL
+
+# Tjekker om filen findes
+if [ -f "$FIL" ]; then
+    echo "✅ Filen '$FIL' findes."
+else
+    echo "❌ Filen '$FIL' findes ikke."
+fi

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Viser alle .conf-filer i /etc
+echo "====================================="
+echo "  .conf-filer i /etc"
+echo "====================================="
+
+# Finder og viser alle filer der ender på .conf
+find /etc -type f -name "*.conf"
