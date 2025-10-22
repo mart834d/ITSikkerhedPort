@@ -1,0 +1,43 @@
+#!/bin/bash
+# Overvåger /etc/passwd i realtid og logger ændringer
+# Bruger inotifywait som er et ekstern softwares som skal hentes ned
+
+LOG_DIR="/var/log/passwd_monitor"
+SNAPSHOT_FILE="$LOG_DIR/passwd.snapshot"
+DIFF_LOG="$LOG_DIR/passwd_changes.log"
+
+# Sørg for log-mappen findes
+mkdir -p "$LOG_DIR"
+
+# Installer inotify-tools hvis det mangler
+if ! command -v inotifywait &>/dev/null; then
+    echo "⚠️ inotifywait er ikke installeret. Installer pakken 'inotify-tools'."
+    exit 1
+fi
+
+# Opret initial snapshot hvis den ikke findes
+if [ ! -f "$SNAPSHOT_FILE" ]; then
+    cp /etc/passwd "$SNAPSHOT_FILE"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Initial snapshot oprettet" >> "$DIFF_LOG"
+    echo "Initial snapshot oprettet. Overvågning starter nu..."
+fi
+
+echo "Overvågning af /etc/passwd i realtid. Tryk Ctrl+C for at stoppe."
+
+# Real-time overvågning
+while true; do
+    # Vent på ændring i /etc/passwd
+    inotifywait -e modify /etc/passwd &>/dev/null
+
+    # Sammenlign med snapshot
+    DIFF=$(diff "$SNAPSHOT_FILE" /etc/passwd)
+    if [ -n "$DIFF" ]; then
+        echo "Ændring fundet i /etc/passwd!"
+        echo "===== $(date '+%Y-%m-%d %H:%M:%S') =====" >> "$DIFF_LOG"
+        echo "$DIFF" >> "$DIFF_LOG"
+        echo "============================" >> "$DIFF_LOG"
+
+        # Opdater snapshot
+        cp /etc/passwd "$SNAPSHOT_FILE"
+    fi
+done

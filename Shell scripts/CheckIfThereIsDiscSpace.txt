@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Angiv hvilken partition der skal overvåges (fx root /)
+PARTITION="/"
+
+# Tjek diskplads
+DISK_USE=$(df "$PARTITION" | tail -1 | awk '{print $5}' | tr -d '%')
+
+if [ "$DISK_USE" -ge 90 ]; then
+    echo "⚠️ ADVARSEL: Ledig diskplads på $PARTITION er under 10%!"
+    echo "Brugt: $DISK_USE%"
+else
+    echo "✅ Diskplads på $PARTITION er OK. Brugt: $DISK_USE%"
+fi

@@ -1,0 +1,36 @@
+#!/bin/bash
+# Generer SHA-256 hash af en fil og tjek integriteten
+
+echo "Vælg funktion:"
+echo "1) Opret hash"
+echo "2) Tjek integritet"
+read -p "Indtast valg (1/2): " VALG
+
+case "$VALG" in
+1)
+    read -p "Indtast filsti: " FIL
+    if [ ! -f "$FIL" ]; then
+        echo "❌ Filen findes ikke."
+        exit 1
+    fi
+
+    HASH_FILE="$FIL.sha256"
+    sha256sum "$FIL" > "$HASH_FILE"
+    echo "✅ SHA-256 hash oprettet og gemt i $HASH_FILE"
+    ;;
+2)
+    read -p "Indtast filsti: " FIL
+    HASH_FILE="$FIL.sha256"
+    if [ ! -f "$FIL" ] || [ ! -f "$HASH_FILE" ]; then
+        echo "❌ Filen eller hash-filen findes ikke."
+        exit 1
+    fi
+
+    # Tjek integriteten
+    sha256sum -c "$HASH_FILE"
+    ;;
+*)
+    echo "Ugyldigt valg."
+    exit 1
+    ;;
+esac

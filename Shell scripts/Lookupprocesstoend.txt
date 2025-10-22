@@ -1,0 +1,222 @@
+#!/usr/bin/env bash
+# Overvåg processer og dræb dem, der matcher et nøgleord/pattern.
+#
+# Usage:
+#   ./Lookupprocesstoend.txt -k KEYWORD [options]
+#
+# Options:
+#   -k KEYWORD     (required) søgeord eller regex (brug -r for extended regex)
+#   -r             treat KEYWORD as extended regex (egrep style) for matching the full cmdline
+#   -i INTERVAL    scan-interval i sekunder (default 5)
+#   -s SIGNAL      signal at sende (default TERM)
+#   -u USER        kun matche processer ejet af USER (valgfrit)
+#   -w FILE        whitelist file: hver linje et ord/regex (cmdline eller pid). Tomme/kommentar-linjer ignoreres.
+#   -m MAX         maks antal kills per scanning-iteration (default 0 = ubegrænset)
+#   -d             dry-run (viser hvad der ville blive dræbt, dræber ikke)
+#   -v             verbose
+#   -h             help
+#
+# Eksempler:
+#   ./proc_watch_kill.sh -k "sleep 100"        # dræb processer hvis cmdline indeholder "sleep 100"
+#   ./proc_watch_kill.sh -k "node" -u www-data # kun node-processer ejet af www-data
+#   ./proc_watch_kill.sh -k "^python .*worker" -r -d   # regex-match, dry-run
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+# Defaults
+INTERVAL=5
+SIGNAL="TERM"
+USER_FILTER=""
+WHITELIST_FILE=""
+MAX_KILLS=0
+DRY_RUN=false
+VERBOSE=false
+USE_REGEX=false
+
+usage() {
+  sed -n '1,200p' "$0"
+  cat <<EOF
+
+Bemærk: Kør kun som bruger med passende rettigheder. Vær forsigtig — dette script kan dræbe processer.
+EOF
+  exit 1
+}
+
+while getopts ":k:ri:s:u:w:m:dvh" opt; do
+  case $opt in
+    k) KEYWORD="$OPTARG" ;;
+    r) USE_REGEX=true ;;
+    i) INTERVAL="$OPTARG" ;;
+    s) SIGNAL="$OPTARG" ;;
+    u) USER_FILTER="$OPTARG" ;;
+    w) WHITELIST_FILE="$OPTARG" ;;
+    m) MAX_KILLS="$OPTARG" ;;
+    d) DRY_RUN=true ;;
+    v) VERBOSE=true ;;
+    h) usage ;;
+    *) usage ;;
+  esac
+done
+
+if [ -z "${KEYWORD:-}" ]; then
+  echo "Fejl: -k KEYWORD er påkrævet."
+  usage
+fi
+
+# current script pid and parent
+SELF_PID=$$
+SELF_PPID=$(ps -o ppid= -p $$ | tr -d ' ')
+
+# load whitelist (normalize)
+WHITELIST_ENTRIES=()
+if [ -n "$WHITELIST_FILE" ]; then
+  if [ ! -f "$WHITELIST_FILE" ]; then
+    echo "Whitelist-fil ikke fundet: $WHITELIST_FILE" >&2
+    exit 2
+  fi
+  while IFS= read -r line || [ -n "$line" ]; do
+    line="${line%%#*}"      # strip comments
+    line="${line##+([[:space:]])}" # leading spaces (bash extglob not enabled here, keep simple)
+    line="${line%%+([[:space:]])}" # trailing spaces
+    if [ -n "$line" ]; then
+      WHITELIST_ENTRIES+=("$line")
+    fi
+  done < "$WHITELIST_FILE"
+fi
+
+# builtin safe-names whitelist (cmd substrings not to kill)
+# add common critical processes to avoid accidental kills (you can extend via whitelist file)
+BUILTIN_WHITELIST=( "init" "systemd" "sshd" "cron" "kthreadd" "kworker" "udevd" "mysqld" "postgres" "docker" "containerd" )
+
+log() {
+  if [ "$VERBOSE" = true ]; then
+    echo "$(date +'%Y-%m-%d %H:%M:%S') - $*"
+  fi
+}
+
+matches_whitelist() {
+  local pid="$1"; shift
+  local cmdline="$*"
+
+  # check pid directly
+  for w in "${WHITELIST_ENTRIES[@]}"; do
+    if [[ "$w" =~ ^[0-9]+$ ]] && [ "$w" -eq "$pid" ]; then
+      return 0
+    fi
+  done
+
+  # check substring/regex against cmdline
+  for w in "${WHITELIST_ENTRIES[@]}"; do
+    if [ "$USE_REGEX" = true ]; then
+      if [[ "$cmdline" =~ $w ]]; then
+        return 0
+      fi
+    else
+      if [[ "$cmdline" == *"$w"* ]]; then
+        return 0
+      fi
+    fi
+  done
+
+  # builtin whitelist substrings
+  for w in "${BUILTIN_WHITELIST[@]}"; do
+    if [[ "$cmdline" == *"$w"* ]]; then
+      return 0
+    fi
+  done
+
+  # never kill this script or its parent
+  if [ "$pid" -eq "$SELF_PID" ] || [ "$pid" -eq "$SELF_PPID" ]; then
+    return 0
+  fi
+
+  return 1
+}
+
+# main loop
+log "Starter overvågning. Søgeord='$KEYWORD' interval=${INTERVAL}s signal=$SIGNAL user_filter='$USER_FILTER' dry_run=$DRY_RUN"
+
+while true; do
+  killed_this_round=0
+
+  # Acquire list of matching processes.
+  # Use ps to get pid, user, and full commandline. We then filter safely in bash.
+  # Format: PID|USER|CMD
+  # Use LANG=C to get predictable output
+  mapfile -t proc_lines < <(LANG=C ps axo pid=,user=,args= | sed -E 's/^ *//' )
+
+  for line in "${proc_lines[@]}"; do
+    # split into PID USER CMD (first two whitespace-separated fields, remainder is cmd)
+    pid=$(printf '%s\n' "$line" | awk '{print $1}')
+    user=$(printf '%s\n' "$line" | awk '{print $2}')
+    # remove first two fields to get cmd
+    cmd=$(printf '%s\n' "$line" | cut -d' ' -f3-)
+
+    # basic sanitation: skip empty pid/cmd
+    if [ -z "$pid" ] || [ -z "$cmd" ]; then
+      continue
+    fi
+
+    # optionally filter by user
+    if [ -n "$USER_FILTER" ] && [ "$USER_FILTER" != "$user" ]; then
+      continue
+    fi
+
+    # match keyword: either substring or regex depending on flag
+    matched=false
+    if [ "$USE_REGEX" = true ]; then
+      if [[ "$cmd" =~ $KEYWORD ]]; then
+        matched=true
+      fi
+    else
+      if [[ "$cmd" == *"$KEYWORD"* ]]; then
+        matched=true
+      fi
+    fi
+
+    if [ "$matched" = true ]; then
+      # check whitelist
+      if matches_whitelist "$pid" "$cmd"; then
+        log "Whitelist-matchede process: pid=$pid user=$user cmd='$cmd' (springer over)"
+        continue
+      fi
+
+      # do not kill kernel threads (pid 0 or bracketed names)
+      if [[ "$cmd" =~ ^\[[^]]+\]$ ]]; then
+        log "Kernel-thread eller bracketed process, springer over: pid=$pid cmd='$cmd'"
+        continue
+      fi
+
+      # perform kill or dry-run
+      if [ "$DRY_RUN" = true ]; then
+        echo "[DRY-RUN] Ville dræbe: pid=$pid user=$user signal=$SIGNAL cmd='$cmd'"
+      else
+        # try graceful kill, then escalate if still alive after short wait
+        if kill -"${SIGNAL}" "$pid" >/dev/null 2>&1; then
+          echo "Dræber: pid=$pid user=$user signal=$SIGNAL cmd='$cmd'"
+          # optionally we can wait and escalate to SIGKILL if still present - keep simple but safe:
+          sleep 0.2
+          if kill -0 "$pid" >/dev/null 2>&1; then
+            echo "Process $pid reagerede ikke på $SIGNAL — sender SIGKILL"
+            kill -9 "$pid" >/dev/null 2>&1 || true
+          fi
+        else
+          echo "Kunne ikke sende signal til pid=$pid (måske rettighedsproblem) cmd='$cmd'"
+        fi
+      fi
+
+      killed_this_round=$((killed_this_round+1))
+
+      # enforce MAX_KILLS if set (>0)
+      if [ "$MAX_KILLS" -gt 0 ] && [ "$killed_this_round" -ge "$MAX_KILLS" ]; then
+        log "Nået maks kills this round: $MAX_KILLS"
+        break
+      fi
+    fi
+  done
+
+  # sleep for interval
+  sleep "$INTERVAL"
+done

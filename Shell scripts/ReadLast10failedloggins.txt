@@ -1,0 +1,36 @@
+#!/bin/bash
+# Viser de sidste N mislykkede loginforsøg fra /var/log/auth.log (inkl. roterede logs hvis muligt)
+# Standard: N=10
+
+N=${1:-10}                  # Antal linjer (valgfrit argument, standard 10)
+LOG_PATTERN="/var/log/auth.log*"
+PATTERN='Failed password|authentication failure|Failed login|Invalid user|PAM.*failed|authentication failure for'
+
+# Funktion: tjek om fil(er) kan læses
+can_read_logs() {
+    for f in $LOG_PATTERN; do
+        if [ -e "$f" ]; then
+            # prøv at læse første fundne fil
+            if [ -r "$f" ]; then
+                return 0
+            fi
+        fi
+    done
+    return 1
+}
+
+if ! can_read_logs; then
+    echo "⚠️  Kan ikke læse $LOG_PATTERN. Kør med sudo eller som root, eller kontroller filrettigheder."
+    exit 1
+fi
+
+echo "Søger efter mislykkede loginforsøg (sidste $N)..."
+
+# Hvis zgrep findes, søg også i komprimerede logs (.gz)
+if command -v zgrep &>/dev/null; then
+    # -h så filnavn ikke skrives i output (gør tail renere)
+    zgrep -Eh --label="$LOG_PATTERN" -iE "$PATTERN" $LOG_PATTERN 2>/dev/null | tail -n "$N"
+else
+    # fallback: almindelig grep (vil ikke læse .gz)
+    grep -Eh -iE "$PATTERN" /var/log/auth.log 2>/dev/null | tail -n "$N"
+fi

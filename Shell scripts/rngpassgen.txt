@@ -1,0 +1,29 @@
+#!/bin/bash
+# Generer en tilfældig adgangskode med minimumskrav til tegnklasser.
+# Når man benytter sig af denne skal man give længden, hvis ikke anvendes 16 tegn.
+# Standard længde: 16
+
+L=${1:-16}   # Hvis et argument gives, bruges det som længde; ellers 16
+
+# Tegn der må bruges (kan justeres)
+SYMBOLS='!@#$%&*()-_=+[]{}:;<>.,?/'
+CHARS="A-Za-z0-9${SYMBOLS}"
+
+# Sørg for at vi har en fornuftig længde
+if ! [[ "$L" =~ ^[0-9]+$ ]] || [ "$L" -lt 4 ]; then
+  echo "Angiv en heltals-længde på mindst 4. F.eks.: ./gen_password.sh 16"
+  exit 1
+fi
+
+# Funktion: generer password indtil krav opfyldes
+while true; do
+  # Hent rå tilfældige bytes fra /dev/urandom, filtrer til tilladte tegn og skær til længde
+  PW=$(tr -dc "$CHARS" < /dev/urandom | head -c "$L")
+
+  # Kontroller at password indeholder mindst én af hver type
+  if [[ "$PW" =~ [A-Z] ]] && [[ "$PW" =~ [a-z] ]] && [[ "$PW" =~ [0-9] ]] && [[ "$PW" =~ [\!\@\#\$\%\&\*\(\)\-\_\=\+\[\]\{\}\:\;\<\>\,\.\?\/] ]]; then
+    echo "$PW"
+    exit 0
+  fi
+  # Ellers loop og prøv igen
+done
